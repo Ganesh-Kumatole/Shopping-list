@@ -1,0 +1,142 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: Arial, Helvetica, sans-serif;
+  border-radius: 5px;
+}
+
+body {
+  background-color: #fffbf2;
+}
+
+.header-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  margin: 2rem 0px;
+}
+
+.header-container img#logo {
+  height: 4rem;
+}
+
+.header-container div.header-txt {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  color: rgb(55, 55, 55);
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 0.7rem;
+}
+
+form input#input-item,
+form button#add-btn {
+  height: 35px;
+  width: 300px;
+}
+
+form input#input-item {
+  border: 1px solid rgb(129, 129, 129);
+  outline: none;
+  padding-left: 0.5rem;
+}
+
+form button#add-btn {
+  height: 40px;
+  color: rgb(55, 55, 55);
+  background-color: #f3b859;
+  border: none;
+  margin-bottom: 2rem;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+div.filter {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+div.filter i {
+  color: gray;
+}
+
+div.filter input#input-filter {
+  height: 25px;
+  background-color: #fffbf2;
+  padding-left: 5px;
+  border: none;
+  border-bottom: 1px solid black;
+  outline: none;
+}
+div.filter input#input-filter::placeholder {
+  color: rgb(63, 63, 63);
+}
+
+ul {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 0.7rem;
+
+  margin: 2rem auto 0px;
+  width: 300px;
+  height: auto;
+}
+
+ul li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  height: 30px;
+  width: 100%;
+  border: 2px solid #d8d8d8;
+
+  padding: 1rem 0.5rem;
+}
+
+ul li p.item-name {
+  color: rgb(55, 55, 55);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+ul li button#cancel-btn {
+  font-size: 1rem;
+  font-weight: 800;
+  color: red;
+  background-color: #fffbf2;
+  border: none;
+  outline: none;
+}
+
+div.clearAll {
+  width: 300px;
+  margin: 2rem auto;
+}
+div.clearAll button {
+  height: 35px;
+  width: 100%;
+  background-color: #fffbf2;
+  outline: none;
+  border: 2px solid rgb(255, 71, 71);
+  color: rgb(255, 71, 71);
+  font-weight: 600;
+}
+div.clearAll button:hover {
+  cursor: pointer;
+  background-color: rgb(255, 71, 71);
+  color: white;
+}

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Shopping List</title>
+    <link rel="stylesheet" href="style.css" />
+    <script src="script.js" defer></script>
+    <script
+      src="https://kit.fontawesome.com/b1b1a843c1.js"
+      crossorigin="anonymous"
+    ></script>
+  </head>
+  <body>
+    <!-- Header -->
+    <header>
+      <section class="header-container">
+        <img
+          src="images/shoppingList-icon.png"
+          alt="Shopping list logo"
+          id="logo"
+        />
+        <div class="header-txt">
+          <h1 class="title">Shopping List</h1>
+          <h4 class="sub-title">Adding to cart made easier...</h4>
+        </div>
+      </section>
+    </header>
+
+    <!-- Input item Form -->
+    <form>
+      <input
+        type="text"
+        id="input-item"
+        placeholder="Enter the items one-by-one..."
+      />
+      <button id="add-btn">Add to the List</button>
+    </form>
+
+    <!-- Filter -->
+    <div class="filter"></div>
+
+    <!-- List -->
+    <ul></ul>
+
+    <!-- Clear All -->
+    <div class="clearAll"></div>
+  </body>
+</html>
