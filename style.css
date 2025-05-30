@@ -114,12 +114,23 @@ ul li p.item-name {
 }
 
 ul li button#cancel-btn {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
   font-size: 1rem;
   font-weight: 800;
+
   color: red;
   background-color: #fffbf2;
   border: none;
   outline: none;
+
+  cursor: pointer;
+}
+
+ul li button#cancel-btn i {
+  padding: 0.2rem;
 }
 
 div.clearAll {
