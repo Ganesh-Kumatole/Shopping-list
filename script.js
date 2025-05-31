@@ -18,58 +18,6 @@ function createIcon(classes) {
   return icon;
 }
 
-function addToList(e) {
-  // Preventing default form submission
-  e.preventDefault();
-
-  // Validating the input
-  if (inputItem.value == "") {
-    alert("Item cannot be empty");
-    return;
-  }
-
-  // Insert into list
-  const li = document.createElement("li");
-  const p = document.createElement("p");
-  const cancelBtn = createButton("cancel-btn");
-  const cancelIcon = createIcon("fa-solid fa-xmark");
-
-  cancelBtn.append(cancelIcon);
-
-  p.className = "item-name";
-  p.textContent = inputItem.value;
-
-  li.append(p);
-  li.append(cancelBtn);
-
-  document.querySelector("ul").append(li);
-
-  inputItem.value = "";
-
-  // Reset UI
-  resetUI();
-}
-
-function cancelItem(e) {
-  // Target cancelIcon & traverse up till item, then remove
-  if (e.target.className === "fa-solid fa-xmark") {
-    e.target.parentElement.parentElement.remove();
-  }
-
-  // Reset UI
-  resetUI();
-}
-
-function clearItems(e) {
-  const listItems = document.querySelectorAll("ul li");
-  listItems.forEach((item) => {
-    item.remove();
-  });
-
-  // Reset UI
-  resetUI();
-}
-
 function resetUI() {
   if (list.querySelectorAll("ul li").length === 0) {
     filter.style.display = "none";
@@ -80,7 +28,124 @@ function resetUI() {
   }
 }
 
-form.addEventListener("submit", addToList);
+function displayStoredItems(e) {
+  JSON.parse(localStorage.getItem("items")).forEach((item) => {
+    addToList(item);
+  });
+
+  resetUI();
+}
+
+function addToLocalStorage(item) {
+  // Array to store items
+  let localStorageArr;
+
+  if (localStorage.getItem("items") != null) {
+    localStorageArr = JSON.parse(localStorage.getItem("items"));
+    localStorageArr.push(item);
+    localStorage.setItem("items", JSON.stringify(localStorageArr));
+  } else {
+    localStorageArr = [];
+    localStorageArr.push(item);
+    localStorage.setItem("items", JSON.stringify(localStorageArr));
+  }
+}
+
+function addToList(item) {
+  const li = document.createElement("li");
+  const p = document.createElement("p");
+  const cancelBtn = createButton("cancel-btn");
+  const cancelIcon = createIcon("fa-solid fa-xmark");
+
+  cancelBtn.append(cancelIcon);
+
+  p.className = "item-name";
+  p.textContent = item;
+
+  li.append(p);
+  li.append(cancelBtn);
+
+  document.querySelector("ul").append(li);
+}
+
+function addToList_and_LocalStorage(e) {
+  // Preventing default form submission
+  e.preventDefault();
+
+  // Reset the filter
+  filter.querySelector("input#input-filter").value = "";
+
+  // Validating the input
+  if (inputItem.value == "") {
+    alert("Item cannot be empty");
+    return;
+  }
+
+  // Insert into list
+  addToList(inputItem.value);
+
+  // Reset UI
+  resetUI();
+
+  // Add to localStorage
+  addToLocalStorage(inputItem.value);
+
+  // Reset the input field
+  inputItem.value = "";
+}
+
+function cancelItem(e) {
+  // Target cancelIcon & traverse up till item, then remove
+
+  const targetItem = e.target.parentElement.parentElement;
+
+  if (e.target.className === "fa-solid fa-xmark") {
+    if (confirm(`Do you want to delete ${targetItem.innerText}?`)) {
+      targetItem.remove();
+
+      // Delete from LocalStorage
+      const localStorageArr = JSON.parse(localStorage.getItem("items"));
+      const targetItem_Index = localStorageArr.indexOf(targetItem.innerText);
+      localStorageArr.splice(targetItem_Index, 1);
+
+      localStorage.setItem("items", JSON.stringify(localStorageArr));
+    }
+  }
+
+  // Reset UI
+  resetUI();
+}
+
+function clearItems(e) {
+  if (confirm("Do you want to Clear All Items?")) {
+    const listItems = document.querySelectorAll("ul li");
+    listItems.forEach((item) => {
+      item.remove();
+    });
+    localStorage.clear();
+  }
+
+  // Reset UI
+  resetUI();
+}
+
+function filterItems(e) {
+  const filterInput = filter.querySelector("input#input-filter");
+
+  list.querySelectorAll("li").forEach((item) => {
+    if (item.innerText.includes(filterInput.value) == false) {
+      item.style.display = "none";
+    } else {
+      item.style.display = "flex";
+    }
+  });
+}
+
+form.addEventListener("submit", addToList_and_LocalStorage);
 list.addEventListener("click", cancelItem);
 clearBtn.addEventListener("click", clearItems);
+filter
+  .querySelector("input#input-filter")
+  .addEventListener("input", filterItems);
+window.addEventListener("load", displayStoredItems);
 resetUI();
