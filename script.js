@@ -1,10 +1,13 @@
 // Selecting required elements from DOM
 const form = document.querySelector("form");
 const inputItem = document.getElementById("input-item");
-const addBtn = document.getElementById("add-btn");
+const formBtn = document.getElementById("add-btn");
+const sort = document.querySelector("div.sort");
 const filter = document.querySelector("div.filter");
 const list = document.querySelector("ul");
 const clearBtn = document.querySelector("div.clearAll button#clear-btn");
+let updateMode = false;
+let isDuplicate = false;
 
 function createButton(id) {
   const btn = document.createElement("button");
@@ -28,15 +31,7 @@ function resetUI() {
   }
 }
 
-function displayStoredItems(e) {
-  JSON.parse(localStorage.getItem("items")).forEach((item) => {
-    addToList(item);
-  });
-
-  resetUI();
-}
-
-function addToLocalStorage(item) {
+function addItemToLocalStorage(item) {
   // Array to store items
   let localStorageArr;
 
@@ -51,7 +46,14 @@ function addToLocalStorage(item) {
   }
 }
 
-function addToList(item) {
+function removeItemFromLocalStorage(ele) {
+  const localStorageArr = JSON.parse(localStorage.getItem("items"));
+  const targetItem_Index = localStorageArr.indexOf(ele.innerText);
+  localStorageArr.splice(targetItem_Index, 1);
+  localStorage.setItem("items", JSON.stringify(localStorageArr));
+}
+
+function addItemToList(item) {
   const li = document.createElement("li");
   const p = document.createElement("p");
   const cancelBtn = createButton("cancel-btn");
@@ -68,7 +70,36 @@ function addToList(item) {
   document.querySelector("ul").append(li);
 }
 
-function addToList_and_LocalStorage(e) {
+function setItemtoUpdate(ele) {
+  if (ele.tagName == "LI" || ele.tagName == "P") {
+    updateMode = true;
+
+    list.querySelectorAll("li").forEach((li) => {
+      li.querySelector("p").style.color = "black";
+    });
+
+    if (ele.tagName == "LI") {
+      ele.querySelector("p").style.color = "grey";
+    } else if (ele.tagName == "P") {
+      ele.style.color = "grey";
+    }
+    inputItem.value = ele.innerText;
+    formBtn.id = "update-btn";
+    formBtn.innerText = "Update Item";
+  }
+}
+
+function displayStoredItems(e) {
+  inputItem.value = "";
+
+  JSON.parse(localStorage.getItem("items")).forEach((item) => {
+    addItemToList(item);
+  });
+
+  resetUI();
+}
+
+function addItem_or_updateItem(e) {
   // Preventing default form submission
   e.preventDefault();
 
@@ -81,42 +112,73 @@ function addToList_and_LocalStorage(e) {
     return;
   }
 
-  // Insert into list
-  addToList(inputItem.value);
+  // Checking for duplicates
+  list.querySelectorAll("li").forEach((li) => {
+    if (li.querySelector("p").innerText === inputItem.value) {
+      alert(`${inputItem.value} already exits!`);
+      location.reload();
+      isDuplicate = true;
+      return;
+    }
+  });
+
+  if (isDuplicate) {
+    return;
+  }
+
+  console.log("object");
+
+  // Checking the State: Add Or Update?
+  if (updateMode) {
+    list.querySelectorAll("li").forEach((li) => {
+      if (li.querySelector("p").style.color == "grey") {
+        // Remove from UI
+        li.remove();
+
+        // Remove from LocalStorage
+        removeItemFromLocalStorage(li.querySelector("p"));
+
+        // Reset state to Add
+        formBtn.id = "add-btn";
+        formBtn.innerText = "Add to List";
+      }
+    });
+  }
+
+  // Insert new item
+  addItemToList(inputItem.value);
+
+  // Add to localStorage
+  addItemToLocalStorage(inputItem.value);
 
   // Reset UI
   resetUI();
-
-  // Add to localStorage
-  addToLocalStorage(inputItem.value);
 
   // Reset the input field
   inputItem.value = "";
 }
 
-function cancelItem(e) {
-  // Target cancelIcon & traverse up till item, then remove
-
-  const targetItem = e.target.parentElement.parentElement;
-
+function removeItem_or_setItemForUpdate(e) {
+  // Click on cancel icon
   if (e.target.className === "fa-solid fa-xmark") {
+    const targetItem = e.target.parentElement.parentElement;
     if (confirm(`Do you want to delete ${targetItem.innerText}?`)) {
       targetItem.remove();
 
       // Delete from LocalStorage
-      const localStorageArr = JSON.parse(localStorage.getItem("items"));
-      const targetItem_Index = localStorageArr.indexOf(targetItem.innerText);
-      localStorageArr.splice(targetItem_Index, 1);
-
-      localStorage.setItem("items", JSON.stringify(localStorageArr));
+      removeItemFromLocalStorage(targetItem);
     }
+  }
+  // Click elsewhere within item
+  else {
+    setItemtoUpdate(e.target);
   }
 
   // Reset UI
   resetUI();
 }
 
-function clearItems(e) {
+function clearAllItems(e) {
   if (confirm("Do you want to Clear All Items?")) {
     const listItems = document.querySelectorAll("ul li");
     listItems.forEach((item) => {
@@ -141,11 +203,12 @@ function filterItems(e) {
   });
 }
 
-form.addEventListener("submit", addToList_and_LocalStorage);
-list.addEventListener("click", cancelItem);
-clearBtn.addEventListener("click", clearItems);
+// Event Listeners
+window.addEventListener("load", displayStoredItems);
+form.addEventListener("submit", addItem_or_updateItem);
+list.addEventListener("click", removeItem_or_setItemForUpdate);
+clearBtn.addEventListener("click", clearAllItems);
 filter
   .querySelector("input#input-filter")
   .addEventListener("input", filterItems);
-window.addEventListener("load", displayStoredItems);
 resetUI();
