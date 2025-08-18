@@ -4,11 +4,95 @@ const inputItem = document.getElementById("input-item");
 const formBtn = document.getElementById("add-btn");
 const sort = document.querySelector("div.sort");
 const filter = document.querySelector("div.filter");
-const list = document.querySelector("ul");
+const notPurchasedList = document.querySelector("ul.not-purchased");
+const purchasedList = document.querySelector("ul.purchased");
 const clearBtn = document.querySelector("div.clearAll button#clear-btn");
 let updateMode = false;
 let isDuplicate = false;
 
+// LocalStorage keys
+const NOT_PURCHASED_KEY = "notPurchased";
+const PURCHASED_KEY = "purchased";
+
+const COLORS = {
+  text: "rgb(55, 55, 55)",
+  muted: "grey",
+  accent: "#f3b859",
+  background: "#fffbf2",
+  danger: "rgb(255, 71, 71)",
+};
+
+function getLS(key) {
+  const raw = localStorage.getItem(key);
+  return raw ? JSON.parse(raw) : [];
+}
+
+function setLS(key, arr) {
+  localStorage.setItem(key, JSON.stringify(arr));
+}
+
+function saveToNotPurchased(item) {
+  const arr = getLS(NOT_PURCHASED_KEY);
+  arr.push(item);
+  setLS(NOT_PURCHASED_KEY, arr);
+}
+
+function saveToPurchased(item) {
+  const arr = getLS(PURCHASED_KEY);
+  arr.push(item);
+  setLS(PURCHASED_KEY, arr);
+}
+
+function removeFromNotPurchased(itemText) {
+  const arr = getLS(NOT_PURCHASED_KEY);
+  const idx = arr.indexOf(itemText);
+  if (idx > -1) {
+    arr.splice(idx, 1);
+    setLS(NOT_PURCHASED_KEY, arr);
+  }
+}
+
+function removeFromPurchased(itemText) {
+  const arr = getLS(PURCHASED_KEY);
+  const idx = arr.indexOf(itemText);
+  if (idx > -1) {
+    arr.splice(idx, 1);
+    setLS(PURCHASED_KEY, arr);
+  }
+}
+
+function moveBetweenStorage(fromKey, toKey, itemText) {
+  const fromArr = getLS(fromKey);
+  const toArr = getLS(toKey);
+  const idx = fromArr.indexOf(itemText);
+  if (idx > -1) {
+    fromArr.splice(idx, 1);
+    toArr.push(itemText);
+    setLS(fromKey, fromArr);
+    setLS(toKey, toArr);
+  }
+}
+
+function updateItemText(oldText, newText) {
+  // try in notPurchased
+  const notArr = getLS(NOT_PURCHASED_KEY);
+  const notIdx = notArr.indexOf(oldText);
+  if (notIdx > -1) {
+    notArr[notIdx] = newText;
+    setLS(NOT_PURCHASED_KEY, notArr);
+    return true;
+  }
+  const purArr = getLS(PURCHASED_KEY);
+  const purIdx = purArr.indexOf(oldText);
+  if (purIdx > -1) {
+    purArr[purIdx] = newText;
+    setLS(PURCHASED_KEY, purArr);
+    return true;
+  }
+  return false;
+}
+
+// UI helpers
 function createButton(id) {
   const btn = document.createElement("button");
   btn.id = id;
@@ -21,135 +105,193 @@ function createIcon(classes) {
   return icon;
 }
 
+function getOrCreateHeading(listEl, headingClass, text) {
+  if (!listEl) return null;
+  // If a child heading with the class exists, reuse it
+  const existing = listEl.querySelector("." + headingClass);
+  if (existing) return existing;
+
+  // Create heading and insert as first child inside the list
+  const h = document.createElement("h4");
+  h.className = headingClass;
+  h.textContent = text;
+  h.style.display = "none"; // hidden by default
+  listEl.insertAdjacentElement("afterbegin", h);
+  return h;
+}
+
 function resetUI() {
-  if (list.querySelectorAll("ul li").length === 0) {
+  // ensure headings exist (dynamic)
+  const notHeading = getOrCreateHeading(
+    notPurchasedList,
+    "not-purchased-heading",
+    "Yet to Buy..."
+  );
+  const purchasedHeading = getOrCreateHeading(
+    purchasedList,
+    "purchased-heading",
+    "Already Purchased..."
+  );
+
+  if (notPurchasedList.querySelectorAll("li").length === 0) {
     filter.style.display = "none";
     clearBtn.style.display = "none";
+    if (notHeading) notHeading.style.display = "none";
   } else {
     filter.style.display = "flex";
     clearBtn.style.display = "block";
+    if (notHeading) notHeading.style.display = "block";
   }
-}
 
-function addItemToLocalStorage(item) {
-  // Array to store items
-  let localStorageArr;
-
-  if (localStorage.getItem("items") != null) {
-    localStorageArr = JSON.parse(localStorage.getItem("items"));
-    localStorageArr.push(item);
-    localStorage.setItem("items", JSON.stringify(localStorageArr));
+  if (purchasedList.querySelectorAll("li").length === 0) {
+    if (purchasedHeading) purchasedHeading.style.display = "none";
   } else {
-    localStorageArr = [];
-    localStorageArr.push(item);
-    localStorage.setItem("items", JSON.stringify(localStorageArr));
+    if (purchasedHeading) purchasedHeading.style.display = "block";
   }
 }
 
-function removeItemFromLocalStorage(ele) {
-  const localStorageArr = JSON.parse(localStorage.getItem("items"));
-  const targetItem_Index = localStorageArr.indexOf(ele.innerText);
-  localStorageArr.splice(targetItem_Index, 1);
-  localStorage.setItem("items", JSON.stringify(localStorageArr));
-}
-
-function addItemToList(item) {
+function addItemToList(item, purchased = false) {
   const li = document.createElement("li");
+
+  // headings are handled dynamically by resetUI via getOrCreateHeading
+
+  const div = document.createElement("div");
+  div.className = "checkbox-item-wrapper";
+
+  const checkbox = document.createElement("input");
+  checkbox.type = "checkbox";
+
   const p = document.createElement("p");
-  const cancelBtn = createButton("cancel-btn");
-  const cancelIcon = createIcon("fa-solid fa-xmark");
-
-  cancelBtn.append(cancelIcon);
-
   p.className = "item-name";
   p.textContent = item;
 
-  li.append(p);
+  div.append(checkbox);
+  div.append(p);
+
+  const cancelBtn = createButton("cancel-btn");
+  const cancelIcon = createIcon("fa-solid fa-xmark");
+  cancelBtn.append(cancelIcon);
+
+  li.append(div);
   li.append(cancelBtn);
 
-  document.querySelector("ul").append(li);
+  if (purchased) {
+    checkbox.checked = true;
+    p.style.textDecoration = "line-through";
+    p.style.color = COLORS.muted;
+    purchasedList.append(li);
+  } else {
+    notPurchasedList.append(li);
+  }
+
+  // update heading visibility
+  resetUI();
+
+  return li;
 }
 
 function setItemtoUpdate(ele) {
-  if (ele.tagName == "LI" || ele.tagName == "P") {
-    updateMode = true;
+  const target =
+    ele.tagName === "P"
+      ? ele.closest("li")
+      : ele.tagName === "LI"
+      ? ele
+      : ele.closest("li");
+  if (!target) return;
 
-    list.querySelectorAll("li").forEach((li) => {
-      li.querySelector("p").style.color = "black";
-    });
+  updateMode = true;
 
-    if (ele.tagName == "LI") {
-      ele.querySelector("p").style.color = "grey";
-    } else if (ele.tagName == "P") {
-      ele.style.color = "grey";
-    }
-    inputItem.value = ele.innerText;
+  // clear previous selection
+  document
+    .querySelectorAll("ul li")
+    .forEach((li) => li.classList.remove("updating"));
+
+  target.classList.add("updating");
+  const p = target.querySelector("p.item-name");
+  if (p) {
+    p.style.color = COLORS.muted;
+    inputItem.value = p.textContent;
     formBtn.id = "update-btn";
     formBtn.innerText = "Update Item";
   }
 }
 
-function displayStoredItems(e) {
+function displayStoredItems() {
   inputItem.value = "";
 
-  JSON.parse(localStorage.getItem("items")).forEach((item) => {
-    addItemToList(item);
-  });
+  const notPurchasedArr = getLS(NOT_PURCHASED_KEY);
+  const purchasedArr = getLS(PURCHASED_KEY);
+
+  // Clear current lists
+  notPurchasedList.innerHTML = "";
+  purchasedList.innerHTML = "";
+
+  notPurchasedArr.forEach((item) => addItemToList(item, false));
+  purchasedArr.forEach((item) => addItemToList(item, true));
 
   resetUI();
 }
 
 function addItem_or_updateItem(e) {
-  // Preventing default form submission
   e.preventDefault();
 
   // Reset the filter
   filter.querySelector("input#input-filter").value = "";
 
-  // Validating the input
-  if (inputItem.value == "") {
+  const value = inputItem.value.trim();
+  if (value === "") {
     alert("Item cannot be empty");
     return;
   }
 
-  // Checking for duplicates
-  list.querySelectorAll("li").forEach((li) => {
-    if (li.querySelector("p").innerText === inputItem.value) {
-      alert(`${inputItem.value} already exits!`);
-      location.reload();
-      isDuplicate = true;
-      return;
-    }
-  });
-
-  if (isDuplicate) {
+  // Checking for duplicates across both lists
+  const existingNot = getLS(NOT_PURCHASED_KEY);
+  const existingPurchased = getLS(PURCHASED_KEY);
+  if (
+    !updateMode &&
+    (existingNot.includes(value) || existingPurchased.includes(value))
+  ) {
+    alert(`${value} already exists!`);
     return;
   }
 
-  console.log("object");
-
-  // Checking the State: Add Or Update?
   if (updateMode) {
-    list.querySelectorAll("li").forEach((li) => {
-      if (li.querySelector("p").style.color == "grey") {
-        // Remove from UI
-        li.remove();
-
-        // Remove from LocalStorage
-        removeItemFromLocalStorage(li.querySelector("p"));
-
-        // Reset state to Add
-        formBtn.id = "add-btn";
-        formBtn.innerText = "Add to List";
+    // find the selected li
+    const selected = document.querySelector("li.updating");
+    if (selected) {
+      const p = selected.querySelector("p.item-name");
+      const oldText = p.textContent;
+      // if new value is duplicate (and different from oldText) prevent
+      if (
+        value === oldText &&
+        (existingNot.includes(value) || existingPurchased.includes(value))
+      ) {
+        alert(`${value} already exists!`);
+        return;
       }
-    });
+
+      p.textContent = value;
+      p.style.color = COLORS.text;
+
+      // update storage
+      updateItemText(oldText, value);
+
+      // clear update mode
+      selected.classList.remove("updating");
+      updateMode = false;
+      formBtn.id = "add-btn";
+      formBtn.innerText = "Add to List";
+      inputItem.value = "";
+      resetUI();
+      return;
+    }
   }
 
   // Insert new item
-  addItemToList(inputItem.value);
+  addItemToList(value, false);
 
-  // Add to localStorage
-  addItemToLocalStorage(inputItem.value);
+  // Add to localStorage (not purchased by default)
+  saveToNotPurchased(value);
 
   // Reset UI
   resetUI();
@@ -158,33 +300,76 @@ function addItem_or_updateItem(e) {
   inputItem.value = "";
 }
 
-function removeItem_or_setItemForUpdate(e) {
-  // Click on cancel icon
-  if (e.target.className === "fa-solid fa-xmark") {
-    const targetItem = e.target.parentElement.parentElement;
-    if (confirm(`Do you want to delete ${targetItem.innerText}?`)) {
-      targetItem.remove();
+function clickedCancelBtn(cancelBtn) {
+  const respListItem = cancelBtn.closest("li");
+  if (!respListItem) return;
+  const text = respListItem.querySelector("p.item-name")?.textContent || "";
+  if (confirm(`Do you want to delete ${text}?`)) {
+    respListItem.remove();
 
-      // Delete from LocalStorage
-      removeItemFromLocalStorage(targetItem);
+    // Delete from LocalStorage
+    if (text) {
+      removeFromNotPurchased(text);
+      removeFromPurchased(text);
+    }
+
+    resetUI();
+  }
+}
+
+function clickedCheckbox(checkbox) {
+  const respListItem = checkbox.closest("li");
+  if (!respListItem) return;
+
+  const p = respListItem.querySelector("p.item-name");
+  const text = p ? p.textContent : "";
+
+  if (checkbox.checked) {
+    p.style.textDecoration = "line-through";
+    p.style.color = COLORS.muted;
+    respListItem.remove();
+    purchasedList.append(respListItem);
+    moveBetweenStorage(NOT_PURCHASED_KEY, PURCHASED_KEY, text);
+  } else {
+    p.style.textDecoration = "none";
+    p.style.color = COLORS.text;
+    respListItem.remove();
+    notPurchasedList.append(respListItem);
+    moveBetweenStorage(PURCHASED_KEY, NOT_PURCHASED_KEY, text);
+  }
+
+  resetUI();
+}
+
+function delegateClick(e) {
+  // handle cancel icon click
+  if (e.target.className === "fa-solid fa-xmark") {
+    clickedCancelBtn(e.target);
+    return;
+  }
+
+  // handle checkbox toggle
+  if (e.target.type === "checkbox") {
+    clickedCheckbox(e.target);
+    return;
+  }
+
+  // handle clicks to set item for update
+  const maybeLi = e.target.closest("li");
+  if (maybeLi && maybeLi.closest("ul") === notPurchasedList) {
+    if (e.target.tagName === "P" || e.target.tagName === "LI") {
+      setItemtoUpdate(e.target);
     }
   }
-  // Click elsewhere within item
-  else {
-    setItemtoUpdate(e.target);
-  }
-
-  // Reset UI
-  resetUI();
 }
 
 function clearAllItems(e) {
   if (confirm("Do you want to Clear All Items?")) {
     const listItems = document.querySelectorAll("ul li");
-    listItems.forEach((item) => {
-      item.remove();
-    });
-    localStorage.clear();
+    listItems.forEach((item) => item.remove());
+    // clear both keys
+    localStorage.removeItem(NOT_PURCHASED_KEY);
+    localStorage.removeItem(PURCHASED_KEY);
   }
 
   // Reset UI
@@ -193,22 +378,28 @@ function clearAllItems(e) {
 
 function filterItems(e) {
   const filterInput = filter.querySelector("input#input-filter");
+  const term = filterInput.value.trim().toLowerCase();
 
-  list.querySelectorAll("li").forEach((item) => {
-    if (item.innerText.includes(filterInput.value) == false) {
+  notPurchasedList.querySelectorAll("li").forEach((item) => {
+    const text = item.innerText.toLowerCase();
+    if (!text.includes(term)) {
       item.style.display = "none";
     } else {
-      item.style.display = "flex";
+      item.style.display = "";
     }
   });
 }
 
-// Event Listeners
-window.addEventListener("load", displayStoredItems);
-form.addEventListener("submit", addItem_or_updateItem);
-list.addEventListener("click", removeItem_or_setItemForUpdate);
-clearBtn.addEventListener("click", clearAllItems);
-filter
-  .querySelector("input#input-filter")
-  .addEventListener("input", filterItems);
-resetUI();
+function initializeApp() {
+  window.addEventListener("load", displayStoredItems);
+  form.addEventListener("submit", addItem_or_updateItem);
+  notPurchasedList.addEventListener("click", delegateClick);
+  purchasedList.addEventListener("click", delegateClick);
+  clearBtn.addEventListener("click", clearAllItems);
+  filter
+    .querySelector("input#input-filter")
+    .addEventListener("input", filterItems);
+  resetUI();
+}
+
+initializeApp();

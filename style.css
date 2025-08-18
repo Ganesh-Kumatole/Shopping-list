@@ -98,12 +98,17 @@ ul {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start;
   gap: 0.7rem;
 
   margin: 2rem auto 0px;
   width: 300px;
   height: auto;
+}
+
+ul h4 {
+  text-align: left;
+  color: rgb(38, 38, 38);
 }
 
 ul li {
@@ -117,6 +122,17 @@ ul li {
 
   padding: 1rem 0.5rem;
 
+  cursor: pointer;
+}
+
+ul li .checkbox-item-wrapper {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+ul li .checkbox-item-wrapper input {
   cursor: pointer;
 }
 
