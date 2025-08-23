@@ -37,6 +37,14 @@ form {
   gap: 0.7rem;
 }
 
+form div.text-speech-input-wrapper {
+  width: 300px;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
 form input#input-item,
 form button#add-btn {
   height: 35px;
@@ -44,9 +52,34 @@ form button#add-btn {
 }
 
 form input#input-item {
+  width: 85%;
   border: 1px solid rgb(129, 129, 129);
   outline: none;
   padding-left: 0.5rem;
+}
+
+form div.microphone-icon {
+  height: 35px;
+  width: 35px;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  border: 1px solid rgb(55, 55, 55);
+  border-radius: 0.25rem;
+
+  cursor: pointer;
+  background-color: white;
+}
+
+form div i {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  font-size: 1rem;
+  color: rgb(55, 55, 55);
 }
 
 form button#add-btn,

@@ -1,27 +1,30 @@
 // Selecting required elements from DOM
-const form = document.querySelector("form");
-const inputItem = document.getElementById("input-item");
-const formBtn = document.getElementById("add-btn");
-const sort = document.querySelector("div.sort");
-const filter = document.querySelector("div.filter");
-const notPurchasedList = document.querySelector("ul.not-purchased");
-const purchasedList = document.querySelector("ul.purchased");
-const clearBtn = document.querySelector("div.clearAll button#clear-btn");
+const form = document.querySelector('form');
+const inputItem = document.getElementById('input-item');
+const formBtn = document.getElementById('add-btn');
+const sort = document.querySelector('div.sort');
+const filter = document.querySelector('div.filter');
+const notPurchasedList = document.querySelector('ul.not-purchased');
+const purchasedList = document.querySelector('ul.purchased');
+const clearBtn = document.querySelector('div.clearAll button#clear-btn');
+const microphoneBtn = document.querySelector('div.microphone-icon');
+
 let updateMode = false;
 let isDuplicate = false;
 
 // LocalStorage keys
-const NOT_PURCHASED_KEY = "notPurchased";
-const PURCHASED_KEY = "purchased";
+const NOT_PURCHASED_KEY = 'notPurchased';
+const PURCHASED_KEY = 'purchased';
 
 const COLORS = {
-  text: "rgb(55, 55, 55)",
-  muted: "grey",
-  accent: "#f3b859",
-  background: "#fffbf2",
-  danger: "rgb(255, 71, 71)",
+  text: 'rgb(55, 55, 55)',
+  muted: 'grey',
+  accent: '#f3b859',
+  background: '#fffbf2',
+  danger: 'rgb(255, 71, 71)',
 };
 
+// Helpers for localStorage
 function getLS(key) {
   const raw = localStorage.getItem(key);
   return raw ? JSON.parse(raw) : [];
@@ -94,13 +97,13 @@ function updateItemText(oldText, newText) {
 
 // UI helpers
 function createButton(id) {
-  const btn = document.createElement("button");
+  const btn = document.createElement('button');
   btn.id = id;
   return btn;
 }
 
 function createIcon(classes) {
-  const icon = document.createElement("i");
+  const icon = document.createElement('i');
   icon.className = classes;
   return icon;
 }
@@ -108,15 +111,15 @@ function createIcon(classes) {
 function getOrCreateHeading(listEl, headingClass, text) {
   if (!listEl) return null;
   // If a child heading with the class exists, reuse it
-  const existing = listEl.querySelector("." + headingClass);
+  const existing = listEl.querySelector('.' + headingClass);
   if (existing) return existing;
 
   // Create heading and insert as first child inside the list
-  const h = document.createElement("h4");
+  const h = document.createElement('h4');
   h.className = headingClass;
   h.textContent = text;
-  h.style.display = "none"; // hidden by default
-  listEl.insertAdjacentElement("afterbegin", h);
+  h.style.display = 'none'; // hidden by default
+  listEl.insertAdjacentElement('afterbegin', h);
   return h;
 }
 
@@ -124,52 +127,61 @@ function resetUI() {
   // ensure headings exist (dynamic)
   const notHeading = getOrCreateHeading(
     notPurchasedList,
-    "not-purchased-heading",
-    "Yet to Buy..."
+    'not-purchased-heading',
+    'Yet to Buy...'
   );
   const purchasedHeading = getOrCreateHeading(
     purchasedList,
-    "purchased-heading",
-    "Already Purchased..."
+    'purchased-heading',
+    'Already Purchased...'
   );
 
-  if (notPurchasedList.querySelectorAll("li").length === 0) {
-    filter.style.display = "none";
-    clearBtn.style.display = "none";
-    if (notHeading) notHeading.style.display = "none";
+  if (notPurchasedList.querySelectorAll('li').length === 0) {
+    filter.style.display = 'none';
+    clearBtn.style.display = 'none';
+    if (notHeading) notHeading.style.display = 'none';
   } else {
-    filter.style.display = "flex";
-    clearBtn.style.display = "block";
-    if (notHeading) notHeading.style.display = "block";
+    filter.style.display = 'flex';
+    clearBtn.style.display = 'block';
+    if (notHeading) notHeading.style.display = 'block';
   }
 
-  if (purchasedList.querySelectorAll("li").length === 0) {
-    if (purchasedHeading) purchasedHeading.style.display = "none";
+  if (purchasedList.querySelectorAll('li').length === 0) {
+    if (purchasedHeading) purchasedHeading.style.display = 'none';
   } else {
-    if (purchasedHeading) purchasedHeading.style.display = "block";
+    if (purchasedHeading) purchasedHeading.style.display = 'block';
+  }
+
+  if (
+    notPurchasedList.childElementCount === 1 &&
+    purchasedList.childElementCount > 1
+  ) {
+    purchasedList.style.marginTop = '0px';
+  } else {
+    purchasedList.style.marginTop = '1.5rem';
   }
 }
 
 function addItemToList(item, purchased = false) {
-  const li = document.createElement("li");
+  const li = document.createElement('li');
 
   // headings are handled dynamically by resetUI via getOrCreateHeading
 
-  const div = document.createElement("div");
-  div.className = "checkbox-item-wrapper";
+  const div = document.createElement('div');
+  div.className = 'checkbox-item-wrapper';
 
-  const checkbox = document.createElement("input");
-  checkbox.type = "checkbox";
+  const checkbox = document.createElement('input');
+  checkbox.type = 'checkbox';
 
-  const p = document.createElement("p");
-  p.className = "item-name";
+  const p = document.createElement('p');
+  p.className = 'item-name';
   p.textContent = item;
 
   div.append(checkbox);
   div.append(p);
 
-  const cancelBtn = createButton("cancel-btn");
-  const cancelIcon = createIcon("fa-solid fa-xmark");
+  const cancelBtn = createButton('cancel-btn');
+  const cancelIcon = createIcon('fa-solid fa-xmark');
   cancelBtn.append(cancelIcon);
 
   li.append(div);
@@ -177,7 +189,7 @@ function addItemToList(item, purchased = false) {
 
   if (purchased) {
     checkbox.checked = true;
-    p.style.textDecoration = "line-through";
+    p.style.textDecoration = 'line-through';
     p.style.color = COLORS.muted;
     purchasedList.append(li);
   } else {
@@ -192,39 +204,39 @@ function addItemToList(item, purchased = false) {
 
 function setItemtoUpdate(ele) {
   const target =
-    ele.tagName === "P"
-      ? ele.closest("li")
-      : ele.tagName === "LI"
+    ele.tagName === 'P'
+      ? ele.closest('li')
+      : ele.tagName === 'LI'
       ? ele
-      : ele.closest("li");
+      : ele.closest('li');
   if (!target) return;
 
   updateMode = true;
 
   // clear previous selection
   document
-    .querySelectorAll("ul li")
-    .forEach((li) => li.classList.remove("updating"));
+    .querySelectorAll('ul li')
+    .forEach((li) => li.classList.remove('updating'));
 
-  target.classList.add("updating");
-  const p = target.querySelector("p.item-name");
+  target.classList.add('updating');
+  const p = target.querySelector('p.item-name');
   if (p) {
     p.style.color = COLORS.muted;
     inputItem.value = p.textContent;
-    formBtn.id = "update-btn";
-    formBtn.innerText = "Update Item";
+    formBtn.id = 'update-btn';
+    formBtn.innerText = 'Update Item';
   }
 }
 
 function displayStoredItems() {
-  inputItem.value = "";
+  inputItem.value = '';
 
   const notPurchasedArr = getLS(NOT_PURCHASED_KEY);
   const purchasedArr = getLS(PURCHASED_KEY);
 
   // Clear current lists
-  notPurchasedList.innerHTML = "";
-  purchasedList.innerHTML = "";
+  notPurchasedList.innerHTML = '';
+  purchasedList.innerHTML = '';
 
   notPurchasedArr.forEach((item) => addItemToList(item, false));
   purchasedArr.forEach((item) => addItemToList(item, true));
@@ -236,11 +248,11 @@ function addItem_or_updateItem(e) {
   e.preventDefault();
 
   // Reset the filter
-  filter.querySelector("input#input-filter").value = "";
+  filter.querySelector('input#input-filter').value = '';
 
   const value = inputItem.value.trim();
-  if (value === "") {
-    alert("Item cannot be empty");
+  if (value === '') {
+    alert('Item cannot be empty');
     return;
   }
 
@@ -257,9 +269,9 @@ function addItem_or_updateItem(e) {
 
   if (updateMode) {
     // find the selected li
-    const selected = document.querySelector("li.updating");
+    const selected = document.querySelector('li.updating');
     if (selected) {
-      const p = selected.querySelector("p.item-name");
+      const p = selected.querySelector('p.item-name');
       const oldText = p.textContent;
       // if new value is duplicate (and different from oldText) prevent
       if (
@@ -277,11 +289,11 @@ function addItem_or_updateItem(e) {
       updateItemText(oldText, value);
 
       // clear update mode
-      selected.classList.remove("updating");
+      selected.classList.remove('updating');
       updateMode = false;
-      formBtn.id = "add-btn";
-      formBtn.innerText = "Add to List";
-      inputItem.value = "";
+      formBtn.id = 'add-btn';
+      formBtn.innerText = 'Add to List';
+      inputItem.value = '';
       resetUI();
       return;
     }
@@ -297,13 +309,13 @@ function addItem_or_updateItem(e) {
   resetUI();
 
   // Reset the input field
-  inputItem.value = "";
+  inputItem.value = '';
 }
 
 function clickedCancelBtn(cancelBtn) {
-  const respListItem = cancelBtn.closest("li");
+  const respListItem = cancelBtn.closest('li');
   if (!respListItem) return;
-  const text = respListItem.querySelector("p.item-name")?.textContent || "";
+  const text = respListItem.querySelector('p.item-name')?.textContent || '';
   if (confirm(`Do you want to delete ${text}?`)) {
     respListItem.remove();
 
@@ -318,20 +330,20 @@ function clickedCancelBtn(cancelBtn) {
 }
 
 function clickedCheckbox(checkbox) {
-  const respListItem = checkbox.closest("li");
+  const respListItem = checkbox.closest('li');
   if (!respListItem) return;
 
-  const p = respListItem.querySelector("p.item-name");
-  const text = p ? p.textContent : "";
+  const p = respListItem.querySelector('p.item-name');
+  const text = p ? p.textContent : '';
 
   if (checkbox.checked) {
-    p.style.textDecoration = "line-through";
+    p.style.textDecoration = 'line-through';
     p.style.color = COLORS.muted;
     respListItem.remove();
     purchasedList.append(respListItem);
     moveBetweenStorage(NOT_PURCHASED_KEY, PURCHASED_KEY, text);
   } else {
-    p.style.textDecoration = "none";
+    p.style.textDecoration = 'none';
     p.style.color = COLORS.text;
     respListItem.remove();
     notPurchasedList.append(respListItem);
@@ -343,29 +355,29 @@ function clickedCheckbox(checkbox) {
 
 function delegateClick(e) {
   // handle cancel icon click
-  if (e.target.className === "fa-solid fa-xmark") {
+  if (e.target.className === 'fa-solid fa-xmark') {
     clickedCancelBtn(e.target);
     return;
   }
 
   // handle checkbox toggle
-  if (e.target.type === "checkbox") {
+  if (e.target.type === 'checkbox') {
     clickedCheckbox(e.target);
     return;
   }
 
   // handle clicks to set item for update
-  const maybeLi = e.target.closest("li");
-  if (maybeLi && maybeLi.closest("ul") === notPurchasedList) {
-    if (e.target.tagName === "P" || e.target.tagName === "LI") {
+  const maybeLi = e.target.closest('li');
+  if (maybeLi && maybeLi.closest('ul') === notPurchasedList) {
+    if (e.target.tagName === 'P' || e.target.tagName === 'LI') {
       setItemtoUpdate(e.target);
     }
   }
 }
 
 function clearAllItems(e) {
-  if (confirm("Do you want to Clear All Items?")) {
-    const listItems = document.querySelectorAll("ul li");
+  if (confirm('Do you want to Clear All Items?')) {
+    const listItems = document.querySelectorAll('ul li');
     listItems.forEach((item) => item.remove());
     // clear both keys
     localStorage.removeItem(NOT_PURCHASED_KEY);
@@ -377,28 +389,58 @@ function clearAllItems(e) {
 }
 
 function filterItems(e) {
-  const filterInput = filter.querySelector("input#input-filter");
+  const filterInput = filter.querySelector('input#input-filter');
   const term = filterInput.value.trim().toLowerCase();
 
-  notPurchasedList.querySelectorAll("li").forEach((item) => {
+  notPurchasedList.querySelectorAll('li').forEach((item) => {
     const text = item.innerText.toLowerCase();
     if (!text.includes(term)) {
-      item.style.display = "none";
+      item.style.display = 'none';
     } else {
-      item.style.display = "";
+      item.style.display = '';
     }
   });
 }
 
+// Speech Recognition Event Handler
+function recognizeVoice(e) {
+  const mikeIcon = microphoneBtn.querySelector('i');
+
+  // Creating the SpeechRecognition object
+  const recognition = new SpeechRecognition() || new webkitSpeechRecognition();
+  recognition.lang = 'en-US';
+  recognition.continuous = false;
+
+  // Turn on microphone
+  if (mikeIcon.classList.contains('fa-microphone-slash')) {
+    mikeIcon.classList.remove('fa-microphone-slash');
+    mikeIcon.classList.add('fa-microphone-lines');
+
+    recognition.start();
+
+    recognition.onresult = (e) => {
+      const rcgText = e.results[0][0].transcript.trim();
+      inputItem.value = rcgText[0].toUpperCase() + rcgText.slice(1);
+    };
+
+    recognition.onend = (e) => {
+      recognition.stop();
+      mikeIcon.classList.remove('fa-microphone-lines');
+      mikeIcon.classList.add('fa-microphone-slash');
+    };
+  }
+}
+
 function initializeApp() {
-  window.addEventListener("load", displayStoredItems);
-  form.addEventListener("submit", addItem_or_updateItem);
-  notPurchasedList.addEventListener("click", delegateClick);
-  purchasedList.addEventListener("click", delegateClick);
-  clearBtn.addEventListener("click", clearAllItems);
+  window.addEventListener('load', displayStoredItems);
+  microphoneBtn.addEventListener('click', recognizeVoice);
+  form.addEventListener('submit', addItem_or_updateItem);
+  notPurchasedList.addEventListener('click', delegateClick);
+  purchasedList.addEventListener('click', delegateClick);
+  clearBtn.addEventListener('click', clearAllItems);
   filter
-    .querySelector("input#input-filter")
-    .addEventListener("input", filterItems);
+    .querySelector('input#input-filter')
+    .addEventListener('input', filterItems);
   resetUI();
 }
 
