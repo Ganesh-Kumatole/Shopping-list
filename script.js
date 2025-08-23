@@ -406,28 +406,55 @@ function filterItems(e) {
 function recognizeVoice(e) {
   const mikeIcon = microphoneBtn.querySelector('i');
 
-  // Creating the SpeechRecognition object
-  const recognition = new SpeechRecognition() || new webkitSpeechRecognition();
+  const SpeechRecognition =
+    window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognition) {
+    alert(
+      'Speech recognition not supported in this browser. Try Chrome on Android or use desktop.'
+    );
+    return;
+  }
+
+  const recognition = new SpeechRecognition();
   recognition.lang = 'en-US';
   recognition.continuous = false;
 
-  // Turn on microphone
+  recognition.onstart = () => console.log('Speech recognition started');
+  recognition.onresult = (ev) => {
+    const rcgText = ev.results[0][0].transcript.trim();
+    inputItem.value = rcgText.length
+      ? rcgText[0].toUpperCase() + rcgText.slice(1)
+      : rcgText;
+  };
+  recognition.onerror = (ev) => {
+    console.error('Speech recognition error', ev);
+    alert('Speech recognition error: ' + (ev.error || 'unknown'));
+    mikeIcon.classList.remove('fa-microphone-lines');
+    mikeIcon.classList.add('fa-microphone-slash');
+  };
+  recognition.onend = () => {
+    mikeIcon.classList.remove('fa-microphone-lines');
+    mikeIcon.classList.add('fa-microphone-slash');
+    console.log('Speech recognition ended');
+  };
+
+  // Start recognition on user click
   if (mikeIcon.classList.contains('fa-microphone-slash')) {
     mikeIcon.classList.remove('fa-microphone-slash');
     mikeIcon.classList.add('fa-microphone-lines');
-
-    recognition.start();
-
-    recognition.onresult = (e) => {
-      const rcgText = e.results[0][0].transcript.trim();
-      inputItem.value = rcgText[0].toUpperCase() + rcgText.slice(1);
-    };
-
-    recognition.onend = (e) => {
+    try {
+      recognition.start();
+    } catch (err) {
+      console.error('recognition.start() failed', err);
+    }
+  } else {
+    try {
       recognition.stop();
-      mikeIcon.classList.remove('fa-microphone-lines');
-      mikeIcon.classList.add('fa-microphone-slash');
-    };
+    } catch (err) {
+      console.warn('recognition.stop() failed', err);
+    }
+    mikeIcon.classList.remove('fa-microphone-lines');
+    mikeIcon.classList.add('fa-microphone-slash');
   }
 }
 
