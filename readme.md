@@ -1,52 +1,23 @@
 # 🛒 Shopping List
 
-A simple, modern shopping list web app to help you manage your grocery or shopping items with ease. Add, filter, update, and remove items—your list is saved in your browser!
+A small, modern shopping list web app — add, update, remove, filter and persist items in your browser.
 
-## Features
+## What's new / Key features
 
-- **Add Items:** Enter items one by one and add them to your shopping list.
-- **Update Items:** Click on an item to edit and update it.
-- **Remove Items:** Remove individual items using the ❌ button.
-- **Clear All:** Remove all items from your list with a single click.
-- **Filter:** Instantly filter your list as you type.
-- **Persistent Storage:** Your list is saved in your browser's localStorage.
+- Add, edit, remove and clear items.
+- Two separate persistent lists in localStorage:
+  - `notPurchased` — items yet to buy
+  - `purchased` — items already bought
+- Items move between lists when you check/uncheck the item checkbox and the change is saved.
+- Speech-to-text input (Web Speech API) with robust feature detection and user-friendly messages.
+- Filtering of not-purchased items in real time.
 
-## Demo
+## Browser support / Speech-to-text notes
 
-![Screenshot](images/Preview.png)
-
-## Getting Started
-
-1. **Clone or Download this repository.**
-2. Open `index.html` in your browser.
-
-No build tools or server required—just open and use!
-
-## Project Structure
-
-```
-/Shopping-list
-│
-├── index.html        # Main HTML file
-├── style.css         # App styling
-├── script.js         # App logic (vanilla JS)
-└── images/
-    └── shoppingList-icon.png
-```
-
-## Usage
-
-- **Add an item:** Type in the input and click "Add to List".
-- **Edit an item:** Click the item text, edit, then click "Update Item".
-- **Remove an item:** Click the ❌ button next to the item.
-- **Clear all:** Click "Clear All" at the bottom.
-- **Filter:** Use the filter box to search your list.
-
-## Tech Stack
-
-- HTML5
-- CSS3
-- JavaScript (ES6+)
-- [Font Awesome](https://fontawesome.com/) for icons
+- Speech recognition uses the Web Speech API:
+  - Best supported: Chrome on Android (desktop Chrome also supported).
+  - Poor or no support: iOS Safari (no SpeechRecognition), some other mobile browsers.
+- If your browser doesn't support the API, the app shows a friendly alert and continues to work without voice input.
+- Microphone permission must be granted by the user; some mobile browsers require an explicit user gesture.
 
 _Happy shopping!_
