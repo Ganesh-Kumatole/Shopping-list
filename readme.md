@@ -1,6 +1,6 @@
 # 🛒 Shopping List
 
-A small, modern shopping list web app — add, update, remove, filter and persist items in your browser.
+A small, modern shopping list web app — add, update, remove, filter, sort and persist items in your browser.
 
 ## What's new / Key features
 
@@ -11,6 +11,7 @@ A small, modern shopping list web app — add, update, remove, filter and persis
 - Items move between lists when you check/uncheck the item checkbox and the change is saved.
 - Speech-to-text input (Web Speech API) with robust feature detection and user-friendly messages.
 - Filtering of not-purchased items in real time.
+- Sorting of not-purchased items in ascending/descending order.
 
 ## Browser support / Speech-to-text notes
 

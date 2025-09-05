@@ -2,8 +2,9 @@
 const form = document.querySelector('form');
 const inputItem = document.getElementById('input-item');
 const formBtn = document.getElementById('add-btn');
-const sort = document.querySelector('div.sort');
 const filter = document.querySelector('div.filter');
+const sort = document.querySelector('div.sort');
+const sortDropdown = document.getElementById('sort-dropdown');
 const notPurchasedList = document.querySelector('ul.not-purchased');
 const purchasedList = document.querySelector('ul.purchased');
 const clearBtn = document.querySelector('div.clearAll button#clear-btn');
@@ -139,10 +140,12 @@ function resetUI() {
   if (notPurchasedList.querySelectorAll('li').length === 0) {
     filter.style.display = 'none';
     clearBtn.style.display = 'none';
+    sort.style.display = 'none';
     if (notHeading) notHeading.style.display = 'none';
   } else {
     filter.style.display = 'flex';
     clearBtn.style.display = 'block';
+    sort.style.display = 'flex';
     if (notHeading) notHeading.style.display = 'block';
   }
 
@@ -402,6 +405,27 @@ function filterItems(e) {
   });
 }
 
+function sortNotPurchased(order) {
+  if (!order) return;
+  const arr = getLS(NOT_PURCHASED_KEY);
+  if (!Array.isArray(arr) || arr.length === 0) return;
+
+  const sorted = arr.sort();
+  if (order === 'ZtoA') sorted.reverse();
+
+  setLS(NOT_PURCHASED_KEY, sorted);
+  displayStoredItems();
+}
+
+function sortItems(e) {
+  const val = e.target.value;
+  if (!val) return;
+  if (val === 'AtoZ') sortNotPurchased('AtoZ');
+  else if (val === 'ZtoA') sortNotPurchased('ZtoA');
+
+  ev.target.value = '';
+}
+
 // Speech Recognition Event Handler
 function recognizeVoice(e) {
   const mikeIcon = microphoneBtn.querySelector('i');
@@ -468,6 +492,8 @@ function initializeApp() {
   filter
     .querySelector('input#input-filter')
     .addEventListener('input', filterItems);
+  sortDropdown.addEventListener('change', sortItems);
+
   resetUI();
 }
 

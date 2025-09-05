@@ -6,11 +6,12 @@
     <title>Shopping List</title>
     <link rel="stylesheet" href="style.css" />
     <link rel="shortcut icon" href="images/shoppingList-icon.png" />
-    <script src="script.js" defer></script>
     <script
       src="https://kit.fontawesome.com/b1b1a843c1.js"
-      crossorigin="anonymous"
+      crossorigin
+      defer
     ></script>
+    <script src="script.js" defer></script>
   </head>
   <body>
     <!-- Header -->
@@ -44,10 +45,20 @@
       <button id="add-btn">Add to List</button>
     </form>
 
-    <!-- Filter -->
-    <div class="filter">
-      <i class="fa-solid fa-filter"></i>
-      <input type="text" placeholder="Filter Items..." id="input-filter" />
+    <!-- Filter & Sort -->
+    <div class="filter-sort-wrapper">
+      <div class="filter">
+        <i class="fa-solid fa-filter"></i>
+        <input type="text" placeholder="Filter Items..." id="input-filter" />
+      </div>
+      <div class="sort">
+        <i class="fa-solid fa-arrow-down-short-wide"></i>
+        <select name="" id="sort-dropdown">
+          <option value="" selected disabled hidden>Sort</option>
+          <option value="AtoZ" id="a-z">A - Z</option>
+          <option value="ZtoA" id="z-a">Z - A</option>
+        </select>
+      </div>
     </div>
 
     <!-- List -->
